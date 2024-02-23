@@ -5,7 +5,7 @@
 [![image](https://img.shields.io/conda/vn/conda-forge/uzgeo.svg)](https://anaconda.org/conda-forge/uzgeo)
 
 
-**A python package for geospatial anlysis**
+**A python package for geospatial analysis**
 
 
 -   Free software: MIT License
