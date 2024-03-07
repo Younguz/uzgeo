@@ -81,6 +81,7 @@ nav:
     - Report Issues: https://github.com/Younguz/uzgeo/issues
     - Examples:
         - examples/lab4.ipynb
+        - examples/lab5.ipynb
         - examples/intro.ipynb
     - API Reference:
           - uzgeo module: uzgeo.md
