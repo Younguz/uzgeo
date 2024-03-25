@@ -14,4 +14,6 @@
 
 ## Features
 
--   TODO
+-   Print font or character
+-   Randomly generate numbers
+-   Calculate the average value of a sequence
