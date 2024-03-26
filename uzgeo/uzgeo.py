@@ -7,20 +7,16 @@ class Map(ipyleaflet.Map):
     This is the map class that inherits from ipyleaflet.Map.
 
     Args:
-        sequence (list or tuple): The sequence of numbers.
-
-    Returns:
-        float: The average value of the sequence.
+        ipyleaflet.Map (Map): The ipyleaflet.Map class.
     """
     def __init__(self, center=[20,0], zoom=2, **kwargs):
         """
-        Calculate the average value of a sequence.  
+        Initialize the map.
 
         Args:
-            sequence (list or tuple): The sequence of numbers.
+            center (list): Set the center of the map. Defaults to [20, 0].
+            zoom (int): Set the zoom level of the map. Defaults to 2.
 
-        Returns:
-            float: The average value of the sequence.
         """
         super().__init__(center=center, zoom=zoom, **kwargs) 
         self.add_control(ipyleaflet.LayersControl())
