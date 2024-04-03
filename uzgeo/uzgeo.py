@@ -65,29 +65,21 @@ def add_geojson(self, data, name="geojson", **kwargs):
         self.add(layer)
 
 
- def add_shp(self, data, name="shp", **kwargs):
-        """
-        Adds a shapefile to the current map.
+ def add_shp(self, data, name='shp', **kwargs):
+    """Adds a shapefile to the map 
 
-        Args:
-            data (str or dict): The path to the shapefile as a string, or a dictionary representing the shapefile.
-            name (str, optional): The name of the layer. Defaults to "shp".
-            **kwargs: Arbitrary keyword arguments.
+    Args:
+        data (str or dict): The path to the map
+        name (str, optional): The name of the shapefile. Defaults to 'shp'.
+    """
+    import shapefile
+    import json
 
-        Raises:
-            TypeError: If the data is neither a string nor a dictionary representing a shapefile.
+    if isinstance(data, str):
+        with shapefile.Reader(data) as shp:
+            data = shp.__geo_interface__
 
-        Returns:
-            None
-        """
-        import shapefile
-        import json
-
-        if isinstance(data, str):
-            with shapefile.Reader(data) as shp:
-                data = shp.__geo_interface__
-
-        self.add_geojson(data, name, **kwargs)
+    self.add_geojson(data, name, **kwargs)
 
 def add_vector(self, data, name="Vector", **kwargs):
     """Adds a vector layer to the map from any GeoPandas-supported vector data format.
