@@ -65,7 +65,7 @@ def add_geojson(self, data, name="geojson", **kwargs):
         self.add(layer)
 
 
- def add_shp(self, data, name='shp', **kwargs):
+def add_shp(self, data, name='shp', **kwargs):
     """Adds a shapefile to the map 
 
     Args:
