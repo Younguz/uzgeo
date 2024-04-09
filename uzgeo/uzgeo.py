@@ -21,7 +21,7 @@ class Map(ipyleaflet.Map):
         super().__init__(center=center, zoom=zoom, **kwargs) 
         self.add_control(ipyleaflet.LayersControl())
 
-def add_basemap(self, name):
+    def add_basemap(self, name):
         """
         Adds a basemap to the current map.
 
@@ -41,8 +41,8 @@ def add_basemap(self, name):
         else:
             self.add(name)
 
-            
-def add_geojson(self, data, name="geojson", **kwargs):
+
+    def add_geojson(self, data, name="geojson", **kwargs):
         """Adds a GeoJSON layer to the map.
 
         Args:
@@ -63,78 +63,82 @@ def add_geojson(self, data, name="geojson", **kwargs):
 
         layer = ipyleaflet.GeoJSON(data=data, name=name, **kwargs)
         self.add(layer)
+    
+    def add_shp(self, data, name='shp', **kwargs):
+        """Adds a shapefile to the map 
 
+        Args:
+            data (str or dict): The path to the map
+            name (str, optional): The name of the shapefile. Defaults to 'shp'.
+        """
+        import shapefile
+        import json
 
-def add_shp(self, data, name='shp', **kwargs):
-    """Adds a shapefile to the map 
+        if isinstance(data, str):
+            with shapefile.Reader(data) as shp:
+                data = shp.__geo_interface__
 
-    Args:
-        data (str or dict): The path to the map
-        name (str, optional): The name of the shapefile. Defaults to 'shp'.
-    """
-    import shapefile
-    import json
+        self.add_geojson(data, name, **kwargs)
 
-    if isinstance(data, str):
-        with shapefile.Reader(data) as shp:
-            data = shp.__geo_interface__
+    def add_vector(self, data, name="Vector", **kwargs):
+        """Adds a vector layer to the map from any GeoPandas-supported vector data format.
 
-    self.add_geojson(data, name, **kwargs)
+        Args:
+            data (str, dict, or geopandas.GeoDataFrame): The vector data. It can be a path to a file (GeoJSON, shapefile), a GeoJSON dict, or a GeoDataFrame.
+            name (str, optional): The name of the layer. Defaults to "Vector".
+        """
+        import geopandas as gpd
+        import json
 
-def add_vector(self, data, name="Vector", **kwargs):
-    """Adds a vector layer to the map from any GeoPandas-supported vector data format.
-
-    Args:
-        data (str, dict, or geopandas.GeoDataFrame): The vector data. It can be a path to a file (GeoJSON, shapefile), a GeoJSON dict, or a GeoDataFrame.
-        name (str, optional): The name of the layer. Defaults to "Vector".
-    """
-    import geopandas as gpd
-    import json
-
-    if isinstance(data, gpd.GeoDataFrame):
+        if isinstance(data, gpd.GeoDataFrame):
         geojson_data = json.loads(data.to_json())
-    elif isinstance(data, (str, dict)):
+        elif isinstance(data, (str, dict)):
         if isinstance(data, str):
             data = gpd.read_file(data)
             geojson_data = json.loads(data.to_json())
         else:  
             geojson_data = data
-    else:
+        else:
         raise ValueError("Unsupported data format")
 
-    self.add_geojson(geojson_data, name, **kwargs)
+        self.add_geojson(geojson_data, name, **kwargs)
+    
+    def add_image(self, url, bounds, name="image", **kwargs):
+        """Adds an image overlay to the map.
+
+        Args:
+            url (str): The URL of the image.
+            bounds (list): The bounds of the image.
+            name (str, optional): The name of the layer. Defaults to "image".
+        """
+        layer = ipyleaflet.ImageOverlay(url=url, bounds=bounds, name=name, **kwargs)
+        self.add(layer)
+
+    def add_raster(self, data, name="raster", zoom_to_layer=True, **kwargs):
+        """Adds a raster layer to the map.
+
+        Args:
+            data (str): The path to the raster file.
+            name (str, optional): The name of the layer. Defaults to "raster".
+         """
+
+        try:
+            from localtileserver import TileClient, get_leaflet_tile_layer
+        except ImportError:
+            raise ImportError("Please install the localtileserver package.")
+
+        client = TileClient(data)
+        layer = get_leaflet_tile_layer(client, name=name, **kwargs)
+        self.add(layer)
+
+        if zoom_to_layer:
+            self.center = client.center()
+            self.zoom = client.default_zoom
 
 
 
-def add_raster(self, data, name="raster", zoom_to_layer=True, **kwargs):
-    """Adds a raster layer to the map.
-
-    Args:
-        data (str): The path to the raster file.
-        name (str, optional): The name of the layer. Defaults to "raster".
-    """
-
-    try:
-        from localtileserver import TileClient, get_leaflet_tile_layer
-    except ImportError:
-        raise ImportError("Please install the localtileserver package.")
-
-    client = TileClient(data)
-    layer = get_leaflet_tile_layer(client, name=name, **kwargs)
-    self.add(layer)
-
-    if zoom_to_layer:
-        self.center = client.center()
-        self.zoom = client.default_zoom
 
 
-def add_image(self, url, bounds, name="image", **kwargs):
-    """Adds an image overlay to the map.
 
-    Args:
-        url (str): The URL of the image.
-        bounds (list): The bounds of the image.
-        name (str, optional): The name of the layer. Defaults to "image".
-    """
-    layer = ipyleaflet.ImageOverlay(url=url, bounds=bounds, name=name, **kwargs)
-    self.add(layer)
+
+
