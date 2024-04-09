@@ -86,6 +86,7 @@ nav:
         - examples/ipyleaflet.ipynb
         - examples/mean.ipynb
         - examples/introfunction.ipynb
+        - examples/vector.ipynb
     - API Reference:
           - uzgeo module: uzgeo.md
           - common module: common.md
