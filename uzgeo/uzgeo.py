@@ -1,25 +1,41 @@
 """Main module."""
 
 import ipyleaflet
+from ipyleaflet import basemaps
+import ipywidgets as widgets
+
 
 class Map(ipyleaflet.Map):
-    """
-    This is the map class that inherits from ipyleaflet.Map.
+    """This is the map class that inherits from ipyleaflet.Map.
 
     Args:
-        ipyleaflet.Map (Map): The ipyleaflet.Map class.
+        ipyleaflet (Map): The ipyleaflet.Map class.
     """
-    def __init__(self, center=[20,0], zoom=2, **kwargs):
-        """
-        Initialize the map.
+
+    def __init__(self, center=[20, 0], zoom=2, **kwargs):
+        """Initialize the map.
 
         Args:
-            center (list): Set the center of the map. Defaults to [20, 0].
-            zoom (int): Set the zoom level of the map. Defaults to 2.
-
+            center (list, optional): Set the center of the map. Defaults to [20, 0].
+            zoom (int, optional): Set the zoom level of the map. Defaults to 2.
         """
-        super().__init__(center=center, zoom=zoom, **kwargs) 
-        self.add_control(ipyleaflet.LayersControl())
+
+        if "scroll_wheel_zoom" not in kwargs:
+            kwargs["scroll_wheel_zoom"] = True
+
+        if "add_layer_control" not in kwargs:
+            layer_control_flag = True
+        else:
+            layer_control_flag = kwargs["add_layer_control"]
+        kwargs.pop("add_layer_control", None)
+
+        super().__init__(center=center, zoom=zoom, **kwargs)
+        if layer_control_flag:
+            self.add_layers_control()
+
+    def add_tile_layer(self, url, name, **kwargs):
+        layer = ipyleaflet.TileLayer(url=url, name=name, **kwargs)
+        self.add(layer)
 
     def add_basemap(self, name):
         """
@@ -41,6 +57,13 @@ class Map(ipyleaflet.Map):
         else:
             self.add(name)
 
+    def add_layers_control(self, position="topright"):
+        """Adds a layers control to the map.
+
+        Args:
+            position (str, optional): The position of the layers control. Defaults to "topright".
+        """
+        self.add_control(ipyleaflet.LayersControl(position=position))
 
     def add_geojson(self, data, name="geojson", **kwargs):
         """Adds a GeoJSON layer to the map.
@@ -63,13 +86,21 @@ class Map(ipyleaflet.Map):
 
         layer = ipyleaflet.GeoJSON(data=data, name=name, **kwargs)
         self.add(layer)
-    
-    def add_shp(self, data, name='shp', **kwargs):
-        """Adds a shapefile to the map 
+
+    def add_shp(self, data, name="shp", **kwargs):
+        """
+        Adds a shapefile to the current map.
 
         Args:
-            data (str or dict): The path to the map
-            name (str, optional): The name of the shapefile. Defaults to 'shp'.
+            data (str or dict): The path to the shapefile as a string, or a dictionary representing the shapefile.
+            name (str, optional): The name of the layer. Defaults to "shp".
+            **kwargs: Arbitrary keyword arguments.
+
+        Raises:
+            TypeError: If the data is neither a string nor a dictionary representing a shapefile.
+
+        Returns:
+            None
         """
         import shapefile
         import json
@@ -80,29 +111,6 @@ class Map(ipyleaflet.Map):
 
         self.add_geojson(data, name, **kwargs)
 
-    def add_vector(self, data, name="Vector", **kwargs):
-        """Adds a vector layer to the map from any GeoPandas-supported vector data format.
-
-        Args:
-            data (str, dict, or geopandas.GeoDataFrame): The vector data. It can be a path to a file (GeoJSON, shapefile), a GeoJSON dict, or a GeoDataFrame.
-            name (str, optional): The name of the layer. Defaults to "Vector".
-        """
-        import geopandas as gpd
-        import json
-
-        if isinstance(data, gpd.GeoDataFrame):
-        geojson_data = json.loads(data.to_json())
-        elif isinstance(data, (str, dict)):
-        if isinstance(data, str):
-            data = gpd.read_file(data)
-            geojson_data = json.loads(data.to_json())
-        else:  
-            geojson_data = data
-        else:
-        raise ValueError("Unsupported data format")
-
-        self.add_geojson(geojson_data, name, **kwargs)
-    
     def add_image(self, url, bounds, name="image", **kwargs):
         """Adds an image overlay to the map.
 
@@ -120,7 +128,7 @@ class Map(ipyleaflet.Map):
         Args:
             data (str): The path to the raster file.
             name (str, optional): The name of the layer. Defaults to "raster".
-         """
+        """
 
         try:
             from localtileserver import TileClient, get_leaflet_tile_layer
@@ -135,9 +143,31 @@ class Map(ipyleaflet.Map):
             self.center = client.center()
             self.zoom = client.default_zoom
 
+    def add_zoom_slider(
+        self, description="Zoom level", min=0, max=24, value=10, position="topright"
+    ):
+        """Adds a zoom slider to the map.
 
+        Args:
+            position (str, optional): The position of the zoom slider. Defaults to "topright".
+        """
+        zoom_slider = widgets.IntSlider(
+            description=description, min=min, max=max, value=value
+        )
 
+        control = ipyleaflet.WidgetControl(widget=zoom_slider, position=position)
+        self.add(control)
+        widgets.jslink((zoom_slider, "value"), (self, "zoom"))
 
+    def add_widget(self, widget, position="topright"):
+        """Adds a widget to the map.
+
+        Args:
+            widget (object): The widget to be added.
+            position (str, optional): The position of the widget. Defaults to "topright".
+        """
+        control = ipyleaflet.WidgetControl(widget=widget, position=position)
+        self.add(control)
 
 
 

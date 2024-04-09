@@ -87,6 +87,7 @@ nav:
         - examples/mean.ipynb
         - examples/introfunction.ipynb
         - examples/vector.ipynb
+        - examples/Raster.ipynb
     - API Reference:
           - uzgeo module: uzgeo.md
           - common module: common.md
