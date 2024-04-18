@@ -170,20 +170,6 @@ class Map(ipyleaflet.Map):
         control = ipyleaflet.WidgetControl(widget=widget, position=position)
         self.add(control)
 
-    def __init__(self, center=[20, 0], zoom=2, **kwargs):
-        super().__init__(center=center, zoom=zoom, **kwargs)
-        if "scroll_wheel_zoom" not in kwargs:
-            kwargs["scroll_wheel_zoom"] = True
-
-        if "add_layer_control" not in kwargs:
-            layer_control_flag = True
-        else:
-            layer_control_flag = kwargs["add_layer_control"]
-        kwargs.pop("add_layer_control", None)
-
-        if layer_control_flag:
-            self.add_layers_control()
-
     def add_basemap_selection(self):
         basemap_options = {
             "OpenStreetMap": basemaps.OpenStreetMap.Mapnik,
