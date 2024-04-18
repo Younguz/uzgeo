@@ -1,10 +1,9 @@
 """Main module."""
 
 import ipyleaflet
-from ipyleaflet import basemaps
 import ipywidgets as widgets
-
-
+from ipyleaflet import basemaps
+from ipyleaflet import WidgetControl
 
 class Map(ipyleaflet.Map):
     """This is the map class that inherits from ipyleaflet.Map.
@@ -171,25 +170,29 @@ class Map(ipyleaflet.Map):
         self.add(control)
 
     def add_basemap_selection(self):
-        basemap_options = {
+        """Adds a dropdown for selecting basemaps and a button to close the dropdown."""
+
+        if not hasattr(self, "_basemap_dropdown") or not hasattr(self, "_close_button"):
+            basemap_options = {
             "OpenStreetMap": basemaps.OpenStreetMap.Mapnik,
             "OpenTopoMap": basemaps.OpenTopoMap,
             "Esri.WorldImagery": basemaps.Esri.WorldImagery,
             "CartoDB.DarkMatter": basemaps.CartoDB.DarkMatter
         }
-        dropdown = widgets.Dropdown(options=list(basemap_options.keys()), description="Basemaps")
-        close_button = widgets.Button(description="Close")
+        self._basemap_dropdown = widgets.Dropdown(options=list(basemap_options.keys()), description="Basemaps")
+        self._close_button = widgets.Button(description="Close")
 
         def on_basemap_change(change):
             self.clear_layers()
             self.add_layer(basemap_options[change.new])
 
         def close_dropdown(b):
-            dropdown.close()
-            close_button.close()
+            self._basemap_dropdown.close()
+            self._close_button.close()
 
-        dropdown.observe(on_basemap_change, names='value')
-        close_button.on_click(close_dropdown)
+        self._basemap_dropdown.observe(on_basemap_change, names='value')
+        self._close_button.on_click(close_dropdown)
 
-        self.add_control(WidgetControl(widget=dropdown, position="topright"))
-        self.add_control(WidgetControl(widget=close_button, position="topright"))
+        self.add_control(WidgetControl(widget=self._basemap_dropdown, position="topright"))
+        self.add_control(WidgetControl(widget=self._close_button, position="topright"))
+        
