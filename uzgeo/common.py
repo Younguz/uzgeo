@@ -24,9 +24,17 @@ def calculate_average(sequence):
     average = total / len(sequence)
     return average
 
-# Given sequence
-number = (1, 5, 5, 6, 7)
+def sum_of_sequence(sequence):
+    """
+    Calculate the sum of a sequence.
 
-# Calculating the mean
-mean_value = calculate_average(number)
-print("Mean:", mean_value)
+    Args:
+    sequence (list): A list of numbers.
+
+    Returns:
+    float: The sum of the numbers in the sequence.
+    """
+    total = 0
+    for num in sequence:
+        total += num
+    return total
