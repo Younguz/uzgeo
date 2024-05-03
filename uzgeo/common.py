@@ -38,3 +38,19 @@ def sum_of_sequence(sequence):
     for num in sequence:
         total += num
     return total
+
+def solve_linear_equation(a, b):
+    """
+    Solve a linear equation of the form ax + b = 0.
+
+    Args:
+        a (float): Coefficient of the variable.
+        b (float): Constant term.
+
+    Returns:
+        float: The solution for the variable x.
+    """
+    if a == 0:
+        raise ValueError("Coefficient 'a' cannot be zero for a linear equation.")
+
+    return -b / a
