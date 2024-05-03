@@ -14,4 +14,5 @@
 ## Features
 
 -   This package provides a convenient interface for creating interactive maps with various layers and controls, making it suitable for tasks ranging from simple visualization to more complex geospatial analysis within Jupyter environments in geospatial.
--   This package also contains some functions that can quickly solve mathematical problems, and provides examples of various funcitons to help you use this package.
+-   This package also contains some functions that can quickly solve mathematical problems, and provides examples of various functions to help you use this package.
+-   Streamlit app: <https://uz-demo.streamlit.app/Interactive_Map>
