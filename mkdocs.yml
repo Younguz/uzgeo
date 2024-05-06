@@ -89,6 +89,7 @@ nav:
         - examples/vector.ipynb
         - examples/Raster.ipynb
         - examples/dropdownlist.ipynb
+        - examples/forecast.ipynb
     - API Reference:
           - uzgeo module: uzgeo.md
           - common module: common.md
