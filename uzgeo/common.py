@@ -80,92 +80,47 @@ def generate_random_points(num_points, min_lat, max_lat, min_long, max_long):
 
 
 
-import random
-
-
-def generate_random_points(num_points, min_lat, max_lat, min_long, max_long):
-    """
-    Generate random points on a map within the specified latitude and longitude range.
-
-    Args:
-    - num_points (int): The number of random points to generate.
-    - min_lat (float): The minimum latitude.
-    - max_lat (float): The maximum latitude.
-    - min_long (float): The minimum longitude.
-    - max_long (float): The maximum longitude.
-
-    Returns:
-    - List of tuples: Each tuple contains the latitude and longitude of a random point.
-    """
-    random_points = []
-    for _ in range(num_points):
-        lat = random.uniform(min_lat, max_lat)
-        long = random.uniform(min_long, max_long)
-        random_points.append((lat, long))
-    return random_points
-
 import pandas as pd
-from statsmodels.tsa.ar_model import AutoReg
+from statsmodels.tsa.arima.model import ARIMA
 
-def generate_random_points_with_timestamps(num_points, min_lat, max_lat, min_long, max_long):
+def forecast_csv(csv_file, column_name, forecast_periods=5, model_params=(1, 0, 1)):
     """
-    Generate random points on a map with timestamps within the specified latitude and longitude range.
+    Forecast a time series data from a CSV file.
 
     Args:
-    - num_points (int): The number of random points to generate.
-    - min_lat (float): The minimum latitude.
-    - max_lat (float): The maximum latitude.
-    - min_long (float): The minimum longitude.
-    - max_long (float): The maximum longitude.
+        csv_file (str): Path to the CSV file.
+        column_name (str): Name of the column containing the time series data.
+        forecast_periods (int): Number of periods to forecast.
+        model_params (tuple): Parameters (p,d,q) for ARIMA model.
 
     Returns:
-    - DataFrame: Each row contains a timestamp, latitude, and longitude.
+        pd.DataFrame: DataFrame containing the original data and forecasted values.
     """
-    random_points = []
-    for _ in range(num_points):
-        lat = random.uniform(min_lat, max_lat)
-        long = random.uniform(min_long, max_long)
-        random_points.append((lat, long))
+    # Read CSV file
+    df = pd.read_csv(csv_file)
     
-    # Generate random timestamps
-    timestamps = pd.date_range(start='2024-01-01', periods=num_points, freq='D')
+    # Convert the column containing time series data to datetime
+    df['Date'] = pd.to_datetime(df['Date'])
     
-    # Create DataFrame with timestamps, latitudes, and longitudes
-    df = pd.DataFrame(random_points, columns=['Latitude', 'Longitude'])
-    df['Timestamp'] = timestamps
+    # Set the date column as index
+    df.set_index('Date', inplace=True)
     
-    return df
-
-def forecast_points(df, forecast_steps=12):
-    """
-    Forecast future points using autoregression (AR) model.
-
-    Args:
-    - df (DataFrame): DataFrame containing timestamped points.
-    - forecast_steps (int): The number of forecast steps to predict.
-
-    Returns:
-    - DataFrame: Forecasted future points.
-    """
-    # Extract latitude and longitude columns
-    points = df[['Latitude', 'Longitude']].copy()
+    # Select the column to forecast
+    ts_data = df[column_name]
     
-    # Fit autoregression model for latitude
-    model_lat = AutoReg(points['Latitude'], lags=1)
-    model_fit_lat = model_lat.fit()
+    # Fit ARIMA model
+    model = ARIMA(ts_data, order=model_params)
+    fitted_model = model.fit()
     
-    # Forecast latitude
-    forecast_lat = model_fit_lat.forecast(steps=forecast_steps)
+    # Forecast
+    forecast = fitted_model.forecast(steps=forecast_periods)
     
-    # Fit autoregression model for longitude
-    model_long = AutoReg(points['Longitude'], lags=1)
-    model_fit_long = model_long.fit()
+    # Create DataFrame for forecasted values
+    forecast_index = pd.date_range(start=ts_data.index[-1], periods=forecast_periods+1, closed='right')[1:]
+    forecast_df = pd.DataFrame(data=forecast, index=forecast_index, columns=['Forecast'])
     
-    # Forecast longitude
-    forecast_long = model_fit_long.forecast(steps=forecast_steps)
+    # Concatenate original data and forecasted values
+    result_df = pd.concat([ts_data, forecast_df])
     
-    # Create DataFrame for forecasted points
-    forecasted_points = pd.DataFrame({'Latitude': forecast_lat, 'Longitude': forecast_long})
-    
-    return forecasted_points
+    return result_df
 
