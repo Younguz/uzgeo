@@ -169,30 +169,40 @@ class Map(ipyleaflet.Map):
         control = ipyleaflet.WidgetControl(widget=widget, position=position)
         self.add(control)
 
-    def add_basemap_selection(self):
-        """Adds a dropdown for selecting basemaps and a button to close the dropdown."""
+    def add_basemap_selection(map_instance):
+        """Adds a dropdown for selecting basemaps, an HTTP URL search bar, and a button to close the dropdown."""
 
-        if not hasattr(self, "_basemap_dropdown") or not hasattr(self, "_close_button"):
+        if not hasattr(map_instance, "_basemap_dropdown") or not hasattr(map_instance, "_close_button") or not hasattr(map_instance, "_url_input"):
             basemap_options = {
             "OpenStreetMap": basemaps.OpenStreetMap.Mapnik,
             "OpenTopoMap": basemaps.OpenTopoMap,
             "Esri.WorldImagery": basemaps.Esri.WorldImagery,
             "CartoDB.DarkMatter": basemaps.CartoDB.DarkMatter
         }
-        self._basemap_dropdown = widgets.Dropdown(options=list(basemap_options.keys()), description="Basemaps")
-        self._close_button = widgets.Button(description="Close")
+        map_instance._basemap_dropdown = widgets.Dropdown(options=list(basemap_options.keys()), description="Basemaps")
+        map_instance._url_input = widgets.Text(placeholder='Enter HTTP URL', description='URL:')
+        map_instance._close_button = widgets.Button(description="Close")
 
         def on_basemap_change(change):
-            self.clear_layers()
-            self.add_layer(basemap_options[change.new])
+            map_instance.clear_layers()
+            map_instance.add_layer(basemap_options[change.new])
+
+        def on_url_submit(sender):
+            custom_url = map_instance._url_input.value
+            if custom_url:
+                map_instance.clear_layers()
+                map_instance.add_layer(basemap.CustomTileLayer(url=custom_url))
 
         def close_dropdown(b):
-            self._basemap_dropdown.close()
-            self._close_button.close()
+            map_instance._basemap_dropdown.close()
+            map_instance._url_input.close()
+            map_instance._close_button.close()
 
-        self._basemap_dropdown.observe(on_basemap_change, names='value')
-        self._close_button.on_click(close_dropdown)
+        map_instance._basemap_dropdown.observe(on_basemap_change, names='value')
+        map_instance._url_input.on_submit(on_url_submit)
+        map_instance._close_button.on_click(close_dropdown)
 
-        self.add_control(WidgetControl(widget=self._basemap_dropdown, position="topright"))
-        self.add_control(WidgetControl(widget=self._close_button, position="topright"))
+        map_instance.add_control(WidgetControl(widget=map_instance._basemap_dropdown, position="topright"))
+        map_instance.add_control(WidgetControl(widget=map_instance._url_input, position="topright"))
+        map_instance.add_control(WidgetControl(widget=map_instance._close_button, position="topright"))
         
