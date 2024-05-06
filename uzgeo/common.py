@@ -80,47 +80,38 @@ def generate_random_points(num_points, min_lat, max_lat, min_long, max_long):
 
 
 
-import pandas as pd
-from statsmodels.tsa.arima.model import ARIMA
+import numpy as np
 
-def forecast_csv(csv_file, column_name, forecast_periods=5, model_params=(1, 0, 1)):
+def forecast_sequence(sequence, forecast_periods=5, lag=1):
     """
-    Forecast a time series data from a CSV file.
+    Forecast the next values in a sequence using a simple autoregressive model.
 
     Args:
-        csv_file (str): Path to the CSV file.
-        column_name (str): Name of the column containing the time series data.
+        sequence (array-like): Sequence of numbers.
         forecast_periods (int): Number of periods to forecast.
-        model_params (tuple): Parameters (p,d,q) for ARIMA model.
+        lag (int): Lag order for the autoregressive model.
 
     Returns:
-        pd.DataFrame: DataFrame containing the original data and forecasted values.
+        np.ndarray: Forecasted values.
     """
-    # Read CSV file
-    df = pd.read_csv(csv_file)
+    # Convert the sequence to numpy array
+    sequence = np.array(sequence)
     
-    # Convert the column containing time series data to datetime
-    df['Date'] = pd.to_datetime(df['Date'])
+    # Initialize the forecasted values list with the original sequence
+    forecasted_values = sequence.tolist()
     
-    # Set the date column as index
-    df.set_index('Date', inplace=True)
+    # Fit autoregressive model
+    for i in range(forecast_periods):
+        # Slice the sequence for the lag order
+        X = sequence[-lag:]
+        
+        # Calculate the next value using the mean of the last 'lag' values
+        next_value = np.mean(X)
+        
+        # Append the next value to the forecasted values
+        forecasted_values.append(next_value)
+        
+        # Update the sequence by appending the next value
+        sequence = np.append(sequence, next_value)
     
-    # Select the column to forecast
-    ts_data = df[column_name]
-    
-    # Fit ARIMA model
-    model = ARIMA(ts_data, order=model_params)
-    fitted_model = model.fit()
-    
-    # Forecast
-    forecast = fitted_model.forecast(steps=forecast_periods)
-    
-    # Create DataFrame for forecasted values
-    forecast_index = pd.date_range(start=ts_data.index[-1], periods=forecast_periods+1, closed='right')[1:]
-    forecast_df = pd.DataFrame(data=forecast, index=forecast_index, columns=['Forecast'])
-    
-    # Concatenate original data and forecasted values
-    result_df = pd.concat([ts_data, forecast_df])
-    
-    return result_df
-
+    return np.array(forecasted_values)
