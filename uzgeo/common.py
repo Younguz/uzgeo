@@ -81,9 +81,7 @@ def generate_random_points(num_points, min_lat, max_lat, min_long, max_long):
 
 
 import random
-import numpy as np
-import pandas as pd
-from statsmodels.tsa.statespace.sarimax import SARIMAX
+
 
 def generate_random_points(num_points, min_lat, max_lat, min_long, max_long):
     """
@@ -106,28 +104,5 @@ def generate_random_points(num_points, min_lat, max_lat, min_long, max_long):
         random_points.append((lat, long))
     return random_points
 
-def forecast_seasonal_results(data, seasonal_period=12, forecast_steps=12):
-    """
-    Forecast seasonal results using SARIMA model.
-
-    Args:
-    - data (list): Time series data.
-    - seasonal_period (int): The seasonal period.
-    - forecast_steps (int): The number of forecast steps to predict.
-
-    Returns:
-    - Forecasted values.
-    """
-    # Convert data to a pandas Series
-    series = pd.Series(data)
-
-    # Fit SARIMA model
-    model = SARIMAX(series, order=(1, 1, 1), seasonal_order=(1, 1, 1, seasonal_period))
-    model_fit = model.fit(disp=False)
-
-    # Forecast
-    forecast = model_fit.forecast(steps=forecast_steps)
-
-    return forecast.tolist()
 
 
